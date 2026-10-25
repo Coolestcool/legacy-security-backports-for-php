@@ -23,6 +23,8 @@ def run(command, **kwargs):
 
 def main(cli, cgi):
     basic = run([cli, '-n', str(HERE / 'compat.php')])
+    if basic.returncode != 0:
+        print(basic.stdout.decode(errors='replace'), basic.stderr.decode(errors='replace'), flush=True)
     check(basic.returncode == 0, 'CLI compatibility fixture exits successfully')
     data = json.loads(basic.stdout)
     check(data['version_id'] in (50640, 70234), 'expected legacy PHP release')

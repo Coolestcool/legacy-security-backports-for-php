@@ -7,4 +7,4 @@ echo json_encode(array(
     'date' => gmdate('Y-m-d', 0),
     'integer' => filter_var('42', FILTER_VALIDATE_INT),
     'string' => substr('abcdef', 1, 3)
-)), JSON_UNESCAPED_SLASHES), "\n";
+), JSON_UNESCAPED_SLASHES), "\n";

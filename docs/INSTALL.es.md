@@ -14,7 +14,7 @@ funcionando y se prueban por separado.
 ## Descargar y preparar
 
 ```sh
-git clone --branch v0.1.0 https://github.com/Coolestcool/legacy-security-backports-for-php.git
+git clone --branch v0.1.1 https://github.com/Coolestcool/legacy-security-backports-for-php.git
 cd legacy-security-backports-for-php
 sha256sum -c SHA256SUMS
 

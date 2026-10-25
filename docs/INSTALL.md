@@ -24,7 +24,7 @@ The tested source releases are **5.6.40** and **7.2.34**, not every 5.6.x/7.2.x.
 ## 2. Download a pinned release
 
 ```sh
-git clone --branch v0.1.0 https://github.com/Coolestcool/legacy-security-backports-for-php.git
+git clone --branch v0.1.1 https://github.com/Coolestcool/legacy-security-backports-for-php.git
 cd legacy-security-backports-for-php
 sha256sum -c SHA256SUMS
 ```

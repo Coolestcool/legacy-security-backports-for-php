@@ -40,7 +40,7 @@ Download a tagged release from [Releases](https://github.com/Coolestcool/legacy-
 or clone this repository at the initial release:
 
 ```sh
-git clone --branch v0.1.0 https://github.com/Coolestcool/legacy-security-backports-for-php.git
+git clone --branch v0.1.1 https://github.com/Coolestcool/legacy-security-backports-for-php.git
 cd legacy-security-backports-for-php
 sha256sum -c SHA256SUMS
 
@@ -74,10 +74,14 @@ workers as described in the [installation and rollback guide](docs/INSTALL.md).
 ## Validation
 
 Publication checks confirmed zero-fuzz applicability against official release
-archives with recorded SHA-256 values. Local CLI/CGI runtime fixtures and a
-[CI template](docs/CI.md) are provided for reproducible builds. Automated GitHub
-Actions is **not enabled in the initial release**; no passing CI run is claimed.
-See [the validation notes](docs/VALIDATION.md) for the actual test coverage.
+archives with recorded SHA-256 values. GitHub Actions is now enabled on `main`
+and builds minimal CLI/CGI/FPM targets with local CLI/CGI smoke tests. Consult
+[the actual runs](https://github.com/Coolestcool/legacy-security-backports-for-php/actions)
+for their status; a workflow file alone is not proof of success. See
+[CI setup](docs/CI.md) and [validation limits](docs/VALIDATION.md).
+
+The immutable `v0.1.0` source archive predates workflow activation. Its patch
+bytes and fixtures are the same; active automation lives on the current branch.
 
 ## Contributing
 

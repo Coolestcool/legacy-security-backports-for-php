@@ -12,11 +12,11 @@ sources.json and the unmodified vendor patches in SHA256SUMS. They check:
 - checksum mismatch and unexpected-version rejection;
 - the complete public file set for deployment data and accidental credentials.
 
-The initial public release does not enable GitHub Actions: the publishing
-credential has no workflow scope. A [reviewable template](CI.md) is included,
-but no passing public CI build is claimed. The new public CLI/CGI fixture was
-not executed on a newly built Linux matrix during release preparation.
-Historical private runtime tests below are separate evidence.
+GitHub Actions is enabled on `main` after publication of the initial v0.1.0
+archive. The public [run history](https://github.com/Coolestcool/legacy-security-backports-for-php/actions)
+is the authority for the actual build/runtime result. The active workflow builds
+on Ubuntu 22.04 for each release in the matrix. Historical private runtime tests
+below are separate evidence; they must not be substituted for a public CI result.
 
 ## Runtime fixtures
 
