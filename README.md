@@ -80,8 +80,9 @@ and builds minimal CLI/CGI/FPM targets with local CLI/CGI smoke tests. Consult
 for their status; a workflow file alone is not proof of success. See
 [CI setup](docs/CI.md) and [validation limits](docs/VALIDATION.md).
 
-The immutable `v0.1.0` source archive predates workflow activation. Its patch
-bytes and fixtures are the same; active automation lives on the current branch.
+The immutable `v0.1.0` archive predates workflow activation and contains a
+compatibility-fixture syntax error corrected in **v0.1.1**. Download v0.1.1 or
+use the current branch for testing. The three Sury patch files are unchanged.
 
 ## Contributing
 

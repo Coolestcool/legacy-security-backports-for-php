@@ -18,6 +18,21 @@ is the authority for the actual build/runtime result. The active workflow builds
 on Ubuntu 22.04 for each release in the matrix. Historical private runtime tests
 below are separate evidence; they must not be substituted for a public CI result.
 
+## Verified public CI result — 24 October 2026 (America/Toronto)
+
+[Run 40149083499](https://github.com/Coolestcool/legacy-security-backports-for-php/actions/runs/40149083499)
+completed successfully for commit `2212daf2c73cee25922a1f514769a744b0a76202`.
+
+| Official source | Zero-fuzz patch sequence | Minimal CLI/CGI/FPM build | Local CLI/CGI fixtures |
+| --- | --- | --- | --- |
+| PHP 5.6.40 | Passed | Passed | Passed |
+| PHP 7.2.34 | Passed, including prerequisite | Passed | Passed |
+
+The first CI run caught a syntax error in the new compatibility fixture. It was
+corrected before this successful run; the vendor patches did not change. The
+v0.1.1 release contains the corrected fixture. Source changes should be tested
+again; documentation-only updates do not extend this test coverage.
+
 ## Runtime fixtures
 
 `tests/check-runtime.py CLI CGI` checks isolated binaries with `-n`, temporary
