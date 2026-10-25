@@ -1,0 +1,12 @@
+[
+  {
+    "version": "5.6.40",
+    "url": "https://museum.php.net/php5/php-5.6.40.tar.gz",
+    "sha256": "56fb9878d12fdd921f6a0897e919f4e980d930160e154cbde2cc6d9206a27cac"
+  },
+  {
+    "version": "7.2.34",
+    "url": "https://museum.php.net/php7/php-7.2.34.tar.xz",
+    "sha256": "409e11bc6a2c18707dfc44bc61c820ddfd81e17481470f3405ee7822d8379903"
+  }
+]
