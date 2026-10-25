@@ -1,4 +1,4 @@
-name: Validate source backports
+name: Validate PHP 5.6.40 source backport
 on:
   push:
   pull_request:
@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['5.6.40', '7.2.34']
+        php: ['5.6.40']
     steps:
       - uses: actions/checkout@v4
       - name: Check patch integrity
