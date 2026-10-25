@@ -21,3 +21,10 @@ The earlier combined distribution passed both release matrices in
 That historical result is separate from each version-specific repository's runs.
 No private deployment logs, addresses, credentials, backups or binaries are
 included in this distribution.
+
+## Verified independent CI result
+
+[Run 40152926763](https://github.com/Coolestcool/legacy-security-backports-for-php-5.6/actions/runs/40152926763) completed successfully for
+commit `4af01443ccee4072182048dabd559996f637e0dc`. The PHP 5.6.40 source-preparation,
+minimal CLI/CGI/FPM compilation and local CLI/CGI fixture steps all passed.
+Only documentation was updated after this tested commit for the v0.2.0 release.
