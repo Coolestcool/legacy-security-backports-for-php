@@ -15,9 +15,9 @@ REPO = Path(__file__).resolve().parents[1]
 def prepare(source, apply=False):
     source = source.resolve(strict=True)
     header = (source / 'main/php_version.h').read_text()
-    match = re.search(r'^#define\s+PHP_VERSION\s+"(5\.6\.40|7\.2\.34)"\s*$', header, re.M)
+    match = re.search(r'^#define\s+PHP_VERSION\s+"(5\.6\.40)"\s*$', header, re.M)
     if not match:
-        raise ValueError('Expected exact PHP_VERSION 5.6.40 or 7.2.34')
+        raise ValueError('Expected exact PHP_VERSION 5.6.40')
     version = match.group(1)
     checksums = {}
     for line in (REPO / 'SHA256SUMS').read_text().splitlines():
@@ -26,14 +26,7 @@ def prepare(source, apply=False):
     for name, digest in checksums.items():
         if hashlib.sha256((REPO / name).read_bytes()).hexdigest() != digest:
             raise ValueError('Checksum mismatch: ' + name)
-    names = ['php56-php2shell.patch'] if version == '5.6.40' else ['php72-prerequisite-ZSTR_MAX_LEN.patch', 'php72-php2shell.patch']
-    if version == '7.2.34':
-        text = (source / 'Zend/zend_string.h').read_text()
-        found = [bool(re.search(r'^\s*#\s*define\s+' + macro + r'\b', text, re.M)) for macro in ['ZSTR_MAX_OVERHEAD', 'ZSTR_MAX_LEN']]
-        if any(found) and not all(found):
-            raise ValueError('Partial ZSTR_MAX_LEN prerequisite; review source first')
-        if all(found):
-            names.pop(0)
+    names = ['php56-php2shell.patch']
     patches = [REPO / 'patches' / n for n in names]
     paths = set()
     for patch in patches:
@@ -67,7 +60,7 @@ def prepare(source, apply=False):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('source', type=Path, help='Disposable PHP 5.6.40 or 7.2.34 source working tree')
+    parser.add_argument('source', type=Path, help='Disposable PHP 5.6.40 source working tree')
     parser.add_argument('--apply', action='store_true', help='Write patched files to the source tree after complete preflight')
     args = parser.parse_args()
     try:

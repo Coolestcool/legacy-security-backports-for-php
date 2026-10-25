@@ -1,103 +1,68 @@
-# Legacy Security Backports for PHP
+# Sury security backports for PHP 5.6
 
-Community distribution and validation tools for the **PHP 5.6.40** and
-**PHP 7.2.34** source backports targeting **CVE-2026-109618** and
-**CVE-2026-109619** (PHP2Shell).
+Community redistribution of the unmodified **Sury backport for PHP 5.6.40**,
+targeting **CVE-2026-109618** and **CVE-2026-109619** (PHP2Shell).
 
-A community redistribution of **Sury vendor backports**, with an application
-guide and validation tooling. Repository maintained by
-[Coolestcool](https://github.com/Coolestcool). All patch authorship stays with
-the original authors; no original fix is claimed here. This is not an official
-Sury repository or a GitHub fork of its packaging history. See
-[provenance](PROVENANCE.md).
+Maintained by [Coolestcool](https://github.com/Coolestcool). Original fix and
+backport authorship remains upstream. This is not an official Sury/PHP project
+or a GitHub fork of the vendor packaging history. See [provenance](PROVENANCE.md).
 
-## Scope
+**This repository is only for PHP 5.6.40.** For PHP 7.2, use the
+[separate repository](https://github.com/Coolestcool/legacy-security-backports-for-php-7.2).
 
-These are source patches for administrators maintaining legacy systems while
-planning a supported migration. They preserve the PHP release number. They do
-**not** turn an end-of-life runtime into a supported or comprehensively secured
-release. They are not an official PHP project release or an LTS service.
+## Download and apply to source
 
-The mitigation changes out-of-memory handling to terminate the affected process
-immediately, resets selected request state and disables session upload-progress
-tracking in code. An OOM request will fail; shutdown callbacks will not run on
-that path. Ordinary file uploads remain supported and must be tested separately.
-
-| Target | Main patch | Prerequisite |
-| --- | --- | --- |
-| PHP 5.6.40 | [php56-php2shell.patch](patches/php56-php2shell.patch) | None for the official 5.6.40 source tree |
-| PHP 7.2.34 | [php72-php2shell.patch](patches/php72-php2shell.patch) | [ZSTR_MAX_LEN backport](patches/php72-prerequisite-ZSTR_MAX_LEN.patch), unless those macros already exist |
-
-Each main patch targets **both CVEs**; the two main patches are alternatives for
-the two PHP versions, not one patch per vulnerability. Package revisions such as
-`5.6.40-38` include distribution-specific patches: retain those patches and build
-from the matching package source. Do not replace the vendor runtime with a
-minimal vanilla build just because its version string matches.
-
-## Download and prepare a source tree
-
-Download a tagged release from [Releases](https://github.com/Coolestcool/legacy-security-backports-for-php/releases)
-or clone this repository at the initial release:
+[Download v0.2.0](https://github.com/Coolestcool/legacy-security-backports-for-php-5.6/releases/tag/v0.2.0)
+contains the patch, source-preparation tool, guides and licenses. No additional prerequisite patch is needed for the official PHP 5.6.40 source.
 
 ```sh
-git clone --branch v0.1.1 https://github.com/Coolestcool/legacy-security-backports-for-php.git
-cd legacy-security-backports-for-php
+git clone --branch v0.2.0 https://github.com/Coolestcool/legacy-security-backports-for-php-5.6.git
+cd legacy-security-backports-for-php-5.6
 sha256sum -c SHA256SUMS
 
-# Default: validate the complete sequence in temporary copies; leave source unchanged.
+# Check the complete patch sequence in temporary copies; leave source unchanged.
 python3 tools/prepare-source.py /path/to/php-5.6.40
-# Or use /path/to/php-7.2.34; its prerequisite is handled automatically.
-
-# Explicitly apply to a disposable, backed-up source working tree after validation.
+# Explicitly apply only to a disposable, backed-up source working tree.
 python3 tools/prepare-source.py /path/to/php-5.6.40 --apply
 ```
 
-On macOS, use `shasum -a 256 -c SHA256SUMS` instead of `sha256sum`.
-Checksums detect changes relative to the checked-out manifest; they are not a
-signature or an independent authenticity guarantee.
+On macOS use `shasum -a 256 -c SHA256SUMS`.
+Checksums are not signatures or independent proof of their own origin.
+The main patch [`php56-php2shell.patch`](patches/php56-php2shell.patch) targets both named CVEs.
 
-The helper never installs binaries, changes php.ini, restarts services or
-contacts a server. It refuses unexpected source versions, patch checksum
-mismatches, rejected hunks and fuzzy application. It does not treat an already
-patched or incompatible tree as success.
+**Patching source does not update a running server.** Rebuild matching
+packages/images, retain required extensions and vendor patches, verify each
+active SAPI and replace old workers. A package revision is more specific than a
+PHP release number; do not overwrite a vendor runtime with a minimal lab build.
 
-**Applying a patch to source does not patch the running server.** Rebuild the
-matching packages/image, validate every active SAPI and replace the running
-workers as described in the [installation and rollback guide](docs/INSTALL.md).
-
+- [Installation and rollback](docs/INSTALL.md)
 - [Guía en español](docs/INSTALL.es.md)
-- [Validation and known limits](docs/VALIDATION.md)
-- [Security scope](SECURITY.md)
-- [Contributing](CONTRIBUTING.md)
-- [Credits and provenance](PROVENANCE.md)
+- [Validation and limits](docs/VALIDATION.md)
+- [GitHub Actions](https://github.com/Coolestcool/legacy-security-backports-for-php-5.6/actions)
+- [Contributing](CONTRIBUTING.md) · [Security reporting](SECURITY.md)
 
-## Validation
+## Scope and behavior
 
-Publication checks confirmed zero-fuzz applicability against official release
-archives with recorded SHA-256 values. GitHub Actions is now enabled on `main`
-and builds minimal CLI/CGI/FPM targets with local CLI/CGI smoke tests. Consult
-[the actual runs](https://github.com/Coolestcool/legacy-security-backports-for-php/actions)
-for their status; a workflow file alone is not proof of success. See
-[CI setup](docs/CI.md) and [validation limits](docs/VALIDATION.md).
+PHP 5.6 is end of life. These are minimal source backports, not a supported
+PHP release or comprehensive coverage of all legacy vulnerabilities. OOM
+handling terminates the affected process immediately; user shutdown callbacks
+will not run on that path. Built-in session upload-progress tracking is disabled
+in code, while normal multipart uploads remain supported and need testing.
+A displayed `session.upload_progress.enabled=1` does not prove tracking is active.
 
-The immutable `v0.1.0` archive predates workflow activation and contains a
-compatibility-fixture syntax error corrected in **v0.1.1**. Download v0.1.1 or
-use the current branch for testing. The three Sury patch files are unchanged.
+Issues and pull requests are welcome. Never attach production configurations,
+credentials or customer data. New exploitable vulnerabilities should follow the
+private reporting guidance in SECURITY.md.
 
-## Contributing
+## Credits and license
 
-Issues and pull requests are welcome, especially reproducible build reports,
-additional distribution coverage, regression tests and reviewed follow-up fixes.
-Never attach production credentials or customer data. For a new exploitable
-vulnerability, use the private reporting guidance in [SECURITY.md](SECURITY.md).
+The main patch credits Arnaud Le Blanc and Ilija Tovilo. Sury packaging, PHP
+Group and Zend contributors retain their credits. Any prerequisite retains its
+own header. Exact public sources and hashes are in [provenance.json](provenance.json).
+Patch files preserve their upstream PHP/Zend licensing; supporting materials
+use the MIT terms in [LICENSE](LICENSE). Original notices are in [LICENSES](LICENSES/).
+This product includes PHP software, freely available from <http://www.php.net/software/>.
 
-## References and license
-
-- [PHP security announcement, 21 October 2026](https://www.php.net/archive/2026.php#2026-10-21-5)
-- [CVE-2026-109618 advisory](https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w)
-- [CVE-2026-109619 advisory](https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp)
-- [PHP 7.4 source backport](https://github.com/php/php-src/tree/PHP-7.4-CVE-2026-109618-109619)
-
-Patch code retains its upstream PHP/Zend licensing. Supporting project materials
-are MIT licensed; see [LICENSE](LICENSE) and [LICENSES](LICENSES/). This product
-includes PHP software, freely available from <http://www.php.net/software/>.
+[PHP announcement](https://www.php.net/archive/2026.php#2026-10-21-5) ·
+[CVE-2026-109618](https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w) ·
+[CVE-2026-109619](https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp)

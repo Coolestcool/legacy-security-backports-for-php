@@ -3,7 +3,7 @@
 ## Supported scope
 
 This project distributes community tooling for the specific legacy PHP source
-backports targeting CVE-2026-109618 and CVE-2026-109619. PHP 5.6 and 7.2 are end
+backports targeting CVE-2026-109618 and CVE-2026-109619. PHP 5.6 is end
 of life. There is no promise of full vulnerability coverage, commercial support,
 a response SLA or compatibility with arbitrary extensions or vendor builds.
 

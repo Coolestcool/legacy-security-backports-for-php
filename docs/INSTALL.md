@@ -1,156 +1,86 @@
-# Apply, build, verify and roll back
+# Install and roll back — PHP 5.6.40
 
-## 1. Identify the actual runtime
+## Identify the real runtime
 
-Inventory the CLI, CGI, Apache module, FPM pools and containers that serve your
-applications. Record exact package revisions, executable paths, build options,
-INI locations, loaded extensions and service definitions. `php -v` describes
-only the CLI selected by PATH; it does not prove what Apache or FPM uses.
+Inventory exact package revisions, CLI/CGI/FPM binaries, Apache modules, container
+images, loaded extensions, INI paths and build options. `php -v` identifies the
+CLI selected by PATH, not the web runtime. Treat configuration output as private.
 
-Useful read-only commands, adjusted to your environment:
+Use source matching your installed package/image and retain every existing
+vendor patch. This tool accepts exactly PHP 5.6.40, not arbitrary 5.6.x.
+No additional prerequisite patch is needed for the official PHP 5.6.40 source.
 
-```sh
-php -v
-php --ini
-php -m
-php-config --configure-options
-```
-
-Treat phpinfo/configuration output as private. Do not post credentials or service
-configuration in an issue. Obtain the source corresponding to your installed
-package or image and retain all existing distribution/security patches.
-The tested source releases are **5.6.40** and **7.2.34**, not every 5.6.x/7.2.x.
-
-## 2. Download a pinned release
+## Download, check and apply
 
 ```sh
-git clone --branch v0.1.1 https://github.com/Coolestcool/legacy-security-backports-for-php.git
-cd legacy-security-backports-for-php
+git clone --branch v0.2.0 https://github.com/Coolestcool/legacy-security-backports-for-php-5.6.git
+cd legacy-security-backports-for-php-5.6
 sha256sum -c SHA256SUMS
-```
-
-Alternatively download and extract the source archive from the release, then
-verify the SHA256SUMS inside it. The helper requires the repository layout; keep
-patches/ and tools/ together. Standalone patch assets have a separate
-`SHA256SUMS.assets` manifest listing their flat download filenames. On macOS use `shasum -a 256 -c SHA256SUMS`.
-
-For an official pristine-source lab, the archives and hashes are in
-[sources.json](../sources.json). For a distribution runtime, start from the
-matching distribution source instead. Archive checksums are pinned bytes, not
-proof of provenance by themselves; verify the upstream signatures as available.
-
-## 3. Check and apply to a disposable source tree
-
-Requirements: Python 3.8+, a working `patch` command and a writable temporary
-directory. The default command modifies only temporary copies of patch target
-files; it leaves your source tree unchanged:
-
-```sh
 python3 tools/prepare-source.py /path/to/php-5.6.40
-python3 tools/prepare-source.py /path/to/php-7.2.34
-```
-
-Choose the command for your release, then explicitly apply:
-
-```sh
 python3 tools/prepare-source.py /path/to/php-5.6.40 --apply
-# OR:
-python3 tools/prepare-source.py /path/to/php-7.2.34 --apply
 ```
 
-PHP 7.2's ZSTR_MAX_LEN prerequisite is applied first if neither prerequisite macro
-exists. It is skipped if both are already defined. A partial prerequisite,
-checksum mismatch, unexpected version, rejected hunk or fuzzy application stops
-the operation. An already patched main tree is rejected, not silently accepted.
-Do not use `--force`, manually ignore rejects or apply the two main version
-patches to the same tree. Use a clean working tree and preserve its original
-source snapshot; this helper is a source preparation tool, not a deployment tool.
+The first helper invocation modifies only temporary copies. `--apply` writes
+source files after the entire sequence passes with zero fuzz. Python 3.8+, patch
+and a writable temporary directory are required. On macOS use
+`shasum -a 256 -c SHA256SUMS`. Rejects, wrong versions, modified patch hashes and
+repeated main application fail; do not force or ignore them. Use a disposable
+source working tree with an original snapshot.
 
-Manual equivalent, from the corresponding source directory after inspecting
-patch contents and validating their checksums:
+Source archives and hashes are in sources.json. Standalone release downloads
+use SHA256SUMS.assets, whose paths are flat filenames. The complete tar archive
+retains patches/, tools/ and its internal SHA256SUMS; extract before using the
+helper. Neither checksum manifest is a signature.
 
-```sh
-# PHP 5.6.40 only; set PATCH_REPO to the absolute clone path.
-patch --batch --forward --fuzz=0 --dry-run -p1 < "$PATCH_REPO/patches/php56-php2shell.patch"
-patch --batch --forward --fuzz=0 -p1 < "$PATCH_REPO/patches/php56-php2shell.patch"
+## Rebuild matching packages or images
 
-# PHP 7.2.34 only, if both prerequisite macros are absent:
-patch --batch --forward --fuzz=0 --dry-run -p1 < "$PATCH_REPO/patches/php72-prerequisite-ZSTR_MAX_LEN.patch"
-patch --batch --forward --fuzz=0 -p1 < "$PATCH_REPO/patches/php72-prerequisite-ZSTR_MAX_LEN.patch"
-# Then check and apply the main 7.2 patch:
-patch --batch --forward --fuzz=0 --dry-run -p1 < "$PATCH_REPO/patches/php72-php2shell.patch"
-patch --batch --forward --fuzz=0 -p1 < "$PATCH_REPO/patches/php72-php2shell.patch"
-```
+Patching source does not update installed binaries. Use the distribution/image
+build process, preserving compiler flags, architecture, thread safety, module
+ABI, extensions, config paths and linked libraries. Rebuild every SAPI that is
+actually used. An updated CLI alone does not update Apache or FPM.
 
-## 4. Rebuild in a matching environment
-
-Use your distribution's package build process or your reproducible image build.
-Preserve compiler flags, prefix, config paths, thread safety, architecture, PHP
-module ABI, every required extension and linked libraries. Record new hashes.
-For example, Debian source packages are normally rebuilt with `dpkg-buildpackage`
-using their recorded build dependencies and quilt series. Add the patch through
-that packaging workflow; a regenerated package source must include it too.
-If a vendor already shipped the fix, use that package rather than applying it
-again. Review vendor changes instead of attempting to remove them.
-
-For a **minimal laboratory build only**, not a replacement for a packaged PHP:
+For a **minimal isolated laboratory build only**:
 
 ```sh
-./configure --disable-all --enable-cli --enable-cgi --enable-fpm   --enable-session --enable-json --enable-hash --enable-filter
+./configure --disable-all --enable-cli --enable-cgi --enable-fpm \
+  --enable-session --enable-json --enable-hash --enable-filter
 make -j2
 python3 "$PATCH_REPO/tests/check-runtime.py" sapi/cli/php sapi/cgi/php-cgi
 ```
 
-This example intentionally omits production extensions and Apache integration.
-It must not be installed over the existing runtime. PHP 5.6's Apache module,
-CGI and CLI are distinct artifacts; FPM/CLI and extension artifacts must likewise
-match the PHP 7.2 image. Merely compiling CLI leaves the web runtime vulnerable.
+Set PATCH_REPO to the absolute clone path before changing into the PHP source
+directory. This example omits production extensions and Apache integration;
+never install it over a packaged production runtime. Prefer vendor-maintained
+packages if they already contain the fix; do not apply it twice.
 
-## 5. Stage and verify before deployment
+## Stage, deploy and validate
 
-Back up the original executables, Apache module, extensions, INI files, wrappers,
-service definitions and image/Compose configuration. Preserve ownership, modes,
-exact image IDs and checksums. Test restore in an isolated copy. Keep independent
-console access and a maintenance window appropriate to your system.
+Back up original packages/binaries, Apache module, extensions, configuration,
+wrappers, permissions, service definitions and exact image/Compose IDs. Test
+restoration in isolation and retain console access.
 
-Validate in staging:
+In staging, compare runtime version, extensions, INI paths and dependencies;
+exercise every active SAPI and the application's representative workflows.
+Check GET/POST, login/session persistence, normal multipart uploads and logs.
+Upload-progress tracking is intentionally disabled in code; OOM shutdown behavior
+changes. Run memory-exhaustion fixtures only in an isolated child process.
 
-- PHP version, extension list, INI paths and dependencies match the original.
-- Real requests exercise each active SAPI and expected application route.
-- GET/POST, persistent sessions and normal multipart uploads work.
-- Upload-progress tracking is intentionally disabled by the backport. An INI
-  value of `1` does not mean tracking is active; check behavior in isolation.
-- Authentication and representative read/write workflows pass with test data.
-- OOM termination behavior is checked only in a bounded laboratory process.
-- Logs show no new loader errors, missing symbols, fatal/parse errors or crashes.
+Deploy through the reviewed package/image procedure. Pin images, retain the
+previous image and configuration, and recreate only affected services. Check
+proxy resolution if container addresses change. Restart or retire every old
+worker and inspect running executable/module mappings, including deleted old
+mappings where available. A successful service-manager status is insufficient.
+Recheck real HTTP responses and logs after activation.
 
-The CLI/CGI fixture is deliberately local and uses no HTTP listener. It is not
-an FPM/Apache integration test and does not certify full application behavior.
+The supplied tests use local CLI/CGI processes and temporary session storage;
+they start no HTTP listener. CI also builds FPM but does not start it. Apache,
+FPM pool and application integration remain separate checks.
 
-## 6. Deploy the built artifacts, then replace every old worker
+## Rollback
 
-Use your reviewed package/image deployment process. For Docker, deploy a pinned
-new image, retain the prior image and configuration, and recreate only affected
-services. Avoid rebuilding arbitrary floating tags in production. Revalidate any
-reverse-proxy upstream resolution if a recreated container changes address.
-
-Check that Apache masters, CGI processes and every FPM pool use the new artifacts.
-A service manager's success status is not proof: inspect the running executable
-and loaded module paths, including old/deleted mappings where supported. Restart
-or gracefully retire stale workers using your platform's service procedure.
-Re-run the application's agreed smoke checks and review logs after activation.
-
-No universal binary replacement or root installer is supplied because package
-layouts, libraries, SAPIs and deployment controls differ between installations.
-
-## 7. Rollback
-
-If agreed checks fail, restore the saved packages/binaries, module, configuration
-and prior container image; recreate/restart the affected services and remove
-stale workers. Check runtime hashes and real application responses again.
-A source-level reverse patch is **not** a rollback of already installed binaries.
-Do not reset databases or repair tables as part of this PHP rollback.
-
-Rollback restores service compatibility but also restores the previous security
-exposure. Investigate in staging before another deployment attempt. Keep a
-record of which artifact is currently serving each application.
+Restore saved packages/binaries, module, extensions, configuration and prior
+image using your deployment controls. Restart/recreate affected services, retire
+stale workers and recheck artifact hashes and real application responses.
+Reversing source alone does not roll back installed binaries. Do not repair or
+reset databases as part of this PHP rollback. Reverting also restores the prior
+security exposure; investigate in staging before retrying deployment.

@@ -27,7 +27,7 @@ def main(cli, cgi):
         print(basic.stdout.decode(errors='replace'), basic.stderr.decode(errors='replace'), flush=True)
     check(basic.returncode == 0, 'CLI compatibility fixture exits successfully')
     data = json.loads(basic.stdout)
-    check(data['version_id'] in (50640, 70234), 'expected legacy PHP release')
+    check(data['version_id'] == 50640, 'expected legacy PHP release')
     check(data['json_roundtrip'] == {'x': [1, 'two', True]} and data['hash'] == hashlib.sha256(b'legacy-source-fixture').hexdigest() and data['date'] == '1970-01-01' and data['integer'] == 42 and data['string'] == 'bcd', 'JSON, hash, date, filter and string compatibility')
     oom = run([cli, '-n', '-d', 'memory_limit=8M', str(HERE / 'oom.php')])
     check(oom.returncode == 1 and b'SHUTDOWN_CALLBACK_RAN' not in oom.stdout and b'Fatal error' in oom.stderr, 'bounded OOM terminates without user shutdown callback')

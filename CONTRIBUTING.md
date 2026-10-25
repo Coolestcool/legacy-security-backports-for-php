@@ -10,7 +10,7 @@ Thanks for helping people maintain safer legacy systems.
    patches from any subsequent changes. Update provenance and SHA256SUMS if a
    patch changes, and document the exact reason.
 4. Run the source preparation checks and local CLI/CGI tests; add a regression test
-   for a behavioral change. Review both PHP versions when shared tooling changes.
+   for a behavioral change. Review this repository's PHP 5.6.40 target when shared tooling changes.
 5. Explain limitations honestly. A successful build is not a security proof or
    confirmation of all application flows. Follow SECURITY.md for private reports.
 

@@ -5,7 +5,7 @@ body:
     id: source
     attributes:
       label: PHP source version and package revision
-      placeholder: PHP 5.6.40 plus distribution revision, or pristine 7.2.34
+      placeholder: PHP 5.6.40 and exact distribution revision
     validations:
       required: true
   - type: textarea
